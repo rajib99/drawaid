@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>DRAWAID · ID Verification</title>
+  <link rel="stylesheet" href="/verify/assets/style.css" />
+</head>
+<body>
+  <div class="card">
+    <div class="brand">DRAWAID</div>
+
+    <div class="progress">
+      <span id="prog-1"></span>
+      <span id="prog-2"></span>
+    </div>
+
+    <!-- Intro -->
+    <section id="screen-intro">
+      <h1>Verify your ID</h1>
+      <p class="subtitle">We need clear photos of the front and back of your ID. Tap below to allow camera access and get started.</p>
+      <button class="btn btn-primary" id="btn-start">Start verification</button>
+    </section>
+
+    <!-- Camera capture -->
+    <section id="screen-camera" class="hidden">
+      <div class="step-label" id="capture-label">Photograph the front of your ID</div>
+      <div class="video-wrap">
+        <video id="video" autoplay playsinline muted></video>
+      </div>
+      <button class="btn btn-primary" id="btn-capture">Capture photo</button>
+      <div class="file-fallback hidden" id="file-fallback">
+        <p class="subtitle">Camera preview isn't available - use your camera app instead:</p>
+        <input type="file" accept="image/*" capture="environment" id="file-input" />
+      </div>
+      <div class="error hidden" id="camera-error"></div>
+    </section>
+
+    <!-- Review captured photo -->
+    <section id="screen-review" class="hidden">
+      <div class="step-label" id="review-label">Front photo</div>
+      <img class="preview" id="preview-img" alt="Captured ID photo preview" />
+      <button class="btn btn-primary" id="btn-use">Use this photo</button>
+      <button class="btn btn-secondary" id="btn-retake">Retake</button>
+    </section>
+
+    <!-- Uploading -->
+    <section id="screen-uploading" class="hidden">
+      <div class="center">
+        <p>Uploading your ID securely&hellip;</p>
+      </div>
+    </section>
+
+    <!-- Done -->
+    <section id="screen-done" class="hidden">
+      <div class="center">
+        <div class="icon-circle">&#10003;</div>
+        <h1>Thank you!</h1>
+        <p class="subtitle">Your ID has been submitted for verification. You may now close this page.</p>
+      </div>
+    </section>
+
+    <div class="error hidden" id="fatal-error"></div>
+  </div>
+
+  <canvas id="canvas" class="hidden"></canvas>
+  <script src="/verify/assets/capture.js"></script>
+</body>
+</html>

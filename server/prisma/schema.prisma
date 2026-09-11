@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VerificationStatus {
+  PENDING
+  ID_UPLOADED
+  VISUALLY_VERIFIED
+  VISUALLY_REJECTED
+  MANUALLY_VERIFIED
+  MANUALLY_REJECTED
+  EXPIRED
+}
+
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  apiKeyHash  String   @unique
+  webhookUrl  String?
+  createdAt   DateTime @default(now())
+
+  verificationRequests VerificationRequest[]
+}
+
+model VerificationRequest {
+  id                String             @id @default(uuid())
+  token             String             @unique
+  businessId        String
+  business          Business           @relation(fields: [businessId], references: [id])
+  customerType      String
+  customerId        String
+  status            VerificationStatus @default(PENDING)
+  frontImagePath    String?
+  backImagePath     String?
+  ocrConfidence     Float?
+  ocrExtractedText  Json?
+  rejectionReason   String?
+  expiresAt         DateTime
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  statusEvents StatusEvent[]
+
+  @@index([businessId])
+  @@index([status])
+  @@index([customerId])
+}
+
+model StatusEvent {
+  id                     String               @id @default(uuid())
+  verificationRequestId  String
+  verificationRequest    VerificationRequest  @relation(fields: [verificationRequestId], references: [id])
+  status                 VerificationStatus
+  label                  String
+  actor                  String
+  note                   String?
+  createdAt              DateTime             @default(now())
+
+  @@index([verificationRequestId])
+}

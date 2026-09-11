@@ -1,0 +1,45 @@
+name: Deploy to VPS
+
+# Runs after CI has built and pushed the image to GHCR for main. Only fires
+# if you've configured the VPS secrets below - otherwise it's a no-op.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["main"]
+    types: [completed]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy compose files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          source: "docker-compose.yml,Caddyfile"
+          target: ${{ secrets.VPS_DEPLOY_PATH }}
+
+      - name: Pull latest image and restart stack
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd ${{ secrets.VPS_DEPLOY_PATH }}
+            # .env already exists on the VPS with DB password, ADMIN_TOKEN,
+            # DOMAIN, etc. - this workflow never touches it. .env.ci only
+            # overrides APP_IMAGE to the tag CI just pushed to GHCR.
+            echo "APP_IMAGE=ghcr.io/${{ github.repository }}:latest" > .env.ci
+            docker compose --env-file .env --env-file .env.ci --profile prod pull app caddy db
+            docker compose --env-file .env --env-file .env.ci --profile prod up -d --no-build
+            docker image prune -f

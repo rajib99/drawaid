@@ -1,0 +1,52 @@
+{
+  "name": "drawaid-server",
+  "version": "1.0.0",
+  "description": "DRAWAID ID verification service",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "prisma generate && tsc -p tsconfig.json && cp -r src/public dist/public",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "vitest run",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:dev": "prisma migrate dev",
+    "seed": "ts-node src/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.4",
+    "tesseract.js": "^5.1.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^20.14.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/supertest": "^6.0.2",
+    "@types/uuid": "^9.0.8",
+    "prisma": "^5.20.0",
+    "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.1"
+  },
+  "allowScripts": {
+    "@prisma/client@5.22.0": true,
+    "@prisma/engines@5.22.0": true,
+    "esbuild@0.21.5": true,
+    "prisma@5.22.0": true,
+    "tesseract.js@5.1.1": true,
+    "fsevents@2.3.3": true
+  }
+}
