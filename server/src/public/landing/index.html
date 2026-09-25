@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{BRAND}} - Verify customer IDs with a QR code</title>
+  <meta name="description" content="{{BRAND}} lets businesses verify a customer's ID from their own phone. Show a QR code, the customer photographs their ID, and you get the photos and a status in your app through a simple API.">
+  <link rel="canonical" href="{{BASE_URL}}/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{BRAND}} - Verify customer IDs with a QR code">
+  <meta property="og:description" content="Show a QR code. Your customer photographs their ID on their phone. You get the photos and a result in your own app.">
+  <meta property="og:url" content="{{BASE_URL}}/">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#2456e8">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232456e8'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff; --bg-alt: #f5f7fb; --surface: #ffffff; --border: #e3e7ef;
+      --text: #0f1729; --muted: #5b6577; --accent: #2456e8; --accent-ink: #fff; --accent-soft: #e8eefe;
+      --ok: #157347; --ok-soft: #e3f4ea; --code-bg: #0f172a; --code-text: #e2e8f0;
+      --shadow: 0 10px 40px rgba(15, 23, 41, 0.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0f17; --bg-alt: #10151f; --surface: #161c28; --border: #263043;
+        --text: #eaeef6; --muted: #98a2b5; --accent: #5b8cff; --accent-ink: #0b1220; --accent-soft: #1a2747;
+        --ok: #4cc38a; --ok-soft: #14301f; --code-bg: #0a0e16; --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; margin: 0; }
+    h1 { font-size: clamp(2.3rem, 5.4vw, 3.6rem); font-weight: 800; }
+    h2 { font-size: clamp(1.7rem, 3.4vw, 2.3rem); font-weight: 750; }
+    h3 { font-size: 1.1rem; letter-spacing: -0.01em; }
+    p { margin: 0; }
+    .lead { font-size: 1.2rem; color: var(--muted); max-width: 34em; }
+    section { padding: 84px 0; }
+    section.alt { background: var(--bg-alt); border-block: 1px solid var(--border); }
+    .eyebrow { color: var(--accent); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 10px; }
+    .section-head { max-width: 640px; margin-bottom: 44px; }
+    .section-head p { color: var(--muted); margin-top: 12px; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 11px; font-weight: 650; font-size: 1rem; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+    .btn:hover { text-decoration: none; border-color: var(--accent); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn.primary:hover { filter: brightness(1.08); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+    /* Nav */
+    header { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+    .nav { display: flex; align-items: center; gap: 24px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.01em; color: var(--text); }
+    .brand:hover { text-decoration: none; }
+    .mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
+    .mark svg { width: 16px; height: 16px; }
+    .nav-links { display: flex; gap: 22px; margin-left: auto; align-items: center; font-size: 0.96rem; }
+    .nav-links a { color: var(--muted); font-weight: 550; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-links .btn { padding: 8px 16px; font-size: 0.93rem; color: var(--accent-ink); }
+    .nav-links .btn:hover { color: var(--accent-ink); }
+    @media (max-width: 720px) { .nav-links a.hide-sm { display: none; } .nav-links { gap: 14px; } }
+
+    /* Hero */
+    .hero { padding: 72px 0 84px; background: radial-gradient(1000px 420px at 85% -10%, var(--accent-soft), transparent 70%); }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center; }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero .lead { margin: 20px 0 30px; }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .fine { color: var(--muted); font-size: 0.9rem; margin-top: 18px; }
+    @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; } .hero { padding-top: 44px; } }
+
+    /* Hero visual */
+    .visual { position: relative; display: grid; place-items: center; min-height: 440px; }
+    .phone { width: 250px; background: var(--surface); border: 8px solid #1b2333; border-radius: 34px; padding: 18px 14px 16px; box-shadow: var(--shadow); position: relative; }
+    @media (prefers-color-scheme: dark) { .phone { border-color: #2a3550; } }
+    .phone::before { content: ""; position: absolute; top: 7px; left: 50%; transform: translateX(-50%); width: 60px; height: 5px; border-radius: 9px; background: var(--border); }
+    .phone-title { font-weight: 700; font-size: 0.86rem; margin: 10px 0 2px; }
+    .phone-sub { color: var(--muted); font-size: 0.74rem; margin-bottom: 12px; line-height: 1.4; }
+    .viewfinder { position: relative; aspect-ratio: 1.58; border-radius: 10px; background: linear-gradient(135deg, #cfd8ea, #e9eef8); overflow: hidden; }
+    @media (prefers-color-scheme: dark) { .viewfinder { background: linear-gradient(135deg, #202a3e, #2b3752); } }
+    .id-card { position: absolute; inset: 16% 12%; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); padding: 8px; display: grid; grid-template-columns: 30% 1fr; gap: 8px; }
+    .id-photo { border-radius: 5px; background: var(--accent-soft); }
+    .id-lines { display: grid; gap: 6px; align-content: start; padding-top: 3px; }
+    .id-lines i { display: block; height: 5px; border-radius: 3px; background: var(--border); }
+    .id-lines i:nth-child(1) { width: 80%; } .id-lines i:nth-child(2) { width: 60%; } .id-lines i:nth-child(3) { width: 70%; }
+    .corner { position: absolute; width: 18px; height: 18px; border: 3px solid var(--accent); }
+    .corner.tl { top: 8px; left: 8px; border-right: 0; border-bottom: 0; border-radius: 5px 0 0 0; }
+    .corner.tr { top: 8px; right: 8px; border-left: 0; border-bottom: 0; border-radius: 0 5px 0 0; }
+    .corner.bl { bottom: 8px; left: 8px; border-right: 0; border-top: 0; border-radius: 0 0 0 5px; }
+    .corner.br { bottom: 8px; right: 8px; border-left: 0; border-top: 0; border-radius: 0 0 5px 0; }
+    .shutter { display: block; width: 46px; height: 46px; margin: 14px auto 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .qr-card, .status-card { position: absolute; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; }
+    .qr-card { left: -22px; top: 8px; width: 118px; text-align: center; font-size: 0.7rem; color: var(--muted); transform: rotate(-4deg); }
+    .qr-card svg { width: 94px; height: 94px; display: block; margin: 0 auto 6px; color: var(--text); }
+    .status-card { right: -6px; bottom: 30px; padding: 12px 14px; transform: rotate(2.5deg); font-size: 0.78rem; }
+    .status-card b { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; background: var(--ok-soft); color: var(--ok); padding: 4px 10px; border-radius: 99px; font-weight: 700; }
+    @media (max-width: 520px) { .qr-card { left: -6px; width: 100px; } .qr-card svg { width: 76px; height: 76px; } .status-card { right: -14px; } }
+
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; counter-reset: step; }
+    .step { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+    .step::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; margin-bottom: 14px; }
+    .step p { color: var(--muted); font-size: 0.96rem; margin-top: 6px; }
+    @media (max-width: 900px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { padding: 24px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .feature .ico { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; margin-bottom: 14px; }
+    .feature .ico svg { width: 21px; height: 21px; }
+    .feature p { color: var(--muted); font-size: 0.96rem; margin-top: 6px; }
+    @media (max-width: 900px) { .features { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+
+    /* Developers */
+    .dev-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 44px; align-items: center; }
+    .checks { list-style: none; padding: 0; margin: 22px 0 28px; display: grid; gap: 10px; }
+    .checks li { display: flex; gap: 10px; color: var(--muted); }
+    .checks li::before { content: ""; flex: 0 0 20px; height: 20px; margin-top: 3px; border-radius: 50%; background: var(--ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-6.5' fill='none' stroke='%23157347' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+    pre { margin: 0; background: var(--code-bg); color: var(--code-text); border-radius: 14px; padding: 20px; overflow-x: auto; font: 0.83rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; box-shadow: var(--shadow); }
+    pre .c { color: #7c8aa5; } pre .k { color: #7fb0ff; } pre .s { color: #8fd7a5; }
+    @media (max-width: 900px) { .dev-grid { grid-template-columns: 1fr; } }
+
+    /* Honest note */
+    .note { max-width: 760px; margin: 0 auto; text-align: center; }
+    .note p { color: var(--muted); margin-top: 14px; }
+
+    /* CTA */
+    .cta { text-align: center; }
+    .cta-box { background: var(--accent); color: var(--accent-ink); border-radius: 24px; padding: 60px 24px; }
+    .cta-box p { opacity: 0.85; margin: 12px auto 26px; max-width: 30em; }
+    .cta-box .btn { background: var(--accent-ink); color: var(--accent); border-color: transparent; }
+    .cta-box .btn.ghost { background: transparent; color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent-ink) 45%, transparent); }
+    .cta-box .cta-row { justify-content: center; }
+
+    footer { border-top: 1px solid var(--border); padding: 36px 0 48px; color: var(--muted); font-size: 0.92rem; }
+    .foot { display: flex; gap: 20px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    .foot a { color: var(--muted); }
+    .foot a:hover { color: var(--text); }
+    .hidden { display: none !important; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="/" aria-label="{{BRAND}} home">
+        <span class="mark"><svg viewBox="0 0 20 20" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5l3.5 3.5 7.5-8"/></svg></span>
+        {{BRAND}}
+      </a>
+      <nav class="nav-links" aria-label="Main">
+        <a class="hide-sm" href="#how">How it works</a>
+        <a class="hide-sm" href="#features">Features</a>
+        <a class="hide-sm" href="#developers">Developers</a>
+        <a href="/docs/">Docs</a>
+        <a href="/portal/">Sign in</a>
+        <a class="btn primary" data-signup href="/portal/#/register">Get started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <h1>Verify customer IDs <em>from their own phone.</em></h1>
+          <p class="lead">Show a QR code. Your customer photographs the front and back of their ID in their phone's browser. You get the photos and a status in your own app. No app to install, no hardware to buy.</p>
+          <div class="cta-row">
+            <a class="btn primary" data-signup href="/portal/#/register">Create your company account</a>
+            <a class="btn" href="/docs/">Read the API docs</a>
+          </div>
+          <p class="fine">Works with any modern phone browser · Add it to your product with one API call</p>
+        </div>
+
+        <div class="visual" aria-hidden="true">
+          <div class="qr-card">
+            <svg viewBox="0 0 29 29" fill="currentColor" shape-rendering="crispEdges">
+              <path d="M0 0h9v9H0zM1 1v7h7V1zM2 2h5v5H2zM20 0h9v9h-9zM21 1v7h7V1zM22 2h5v5h-5zM0 20h9v9H0zM1 21v7h7v-7zM2 22h5v5H2z" fill-rule="evenodd"/>
+              <path d="M11 0h2v2h-2zM14 1h2v3h-2zM11 4h2v2h-2zM16 5h2v2h-2zM12 8h3v2h-3zM0 11h2v2H0zM3 12h2v3H3zM7 11h2v2H7zM11 11h3v2h-3zM16 11h2v3h-2zM20 12h2v2h-2zM24 11h3v2h-3zM27 14h2v2h-2zM0 15h3v2H0zM5 15h2v2H5zM9 14h2v3H9zM13 15h2v2h-2zM18 16h3v2h-3zM23 15h2v3h-2zM11 19h2v3h-2zM15 19h3v2h-3zM20 20h2v2h-2zM24 20h3v2h-3zM27 22h2v3h-2zM13 23h2v2h-2zM17 23h3v2h-3zM22 24h2v3h-2zM11 26h3v3h-3zM16 27h2v2h-2zM25 26h2v3h-2z"/>
+            </svg>
+            Scan to verify
+          </div>
+          <div class="phone">
+            <div class="phone-title">Photograph your ID</div>
+            <div class="phone-sub">Step 1 of 2 · Front of your ID. Fit it inside the frame.</div>
+            <div class="viewfinder">
+              <div class="id-card"><div class="id-photo"></div><div class="id-lines"><i></i><i></i><i></i></div></div>
+              <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+            </div>
+            <span class="shutter"></span>
+          </div>
+          <div class="status-card">
+            <b>Status</b>
+            <span class="pill">✓ Auto-check passed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">How it works</div>
+          <h2>From request to decision in four steps</h2>
+        </div>
+        <div class="steps">
+          <div class="step"><h3>Request</h3><p>Your system, or a teammate in our web portal, asks for a verification for one customer and gets a QR code.</p></div>
+          <div class="step"><h3>Scan</h3><p>The customer scans it with their phone. A guided page opens right in the browser, with no app and no account.</p></div>
+          <div class="step"><h3>Capture</h3><p>They photograph the front and back of their ID. An automated visual check runs as soon as the photos arrive.</p></div>
+          <div class="step"><h3>Decide</h3><p>You're notified, review the photos, and record a verified or rejected decision under your company name.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="alt">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Features</div>
+          <h2>Everything you need, nothing you don't</h2>
+          <p>A focused tool for collecting and reviewing ID photos, whether you're a developer or you never want to touch code.</p>
+        </div>
+        <div class="features">
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div><h3>Nothing for customers to install</h3><p>Verification runs in the phone's browser. A QR code, a link by SMS or email, whatever fits your flow.</p></div>
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></div><h3>Simple REST API and webhooks</h3><p>Create a request, poll or receive webhooks, download the images. Five endpoints, documented with copy-paste examples.</p></div>
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 14h3"/></svg></div><h3>A web portal, no code needed</h3><p>Sign in to generate QR codes, watch statuses update live, view the photos and approve or reject with one click.</p></div>
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5M8 11l2 2 4-4"/></svg></div><h3>Automated pre-screen</h3><p>An OCR check flags blurry or unreadable photos and obviously malformed ID data before a person looks at them.</p></div>
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>A permanent audit trail</h3><p>Every status change is timestamped and attributed, including who made the final call and when.</p></div>
+          <div class="feature"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div><h3>Your photos stay yours</h3><p>ID photos are only retrievable with your credentials, and capture links are single-use and expire automatically.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="developers">
+      <div class="wrap dev-grid">
+        <div>
+          <div class="eyebrow">For developers</div>
+          <h2>One API call to a QR code</h2>
+          <ul class="checks">
+            <li>Register in the portal and get your API key in under a minute</li>
+            <li>Get a ready-made QR code image, or just the capture link</li>
+            <li>Webhooks on every status change, plus polling as a fallback</li>
+            <li>Download front and back images straight into your backend</li>
+          </ul>
+          <a class="btn primary" href="/docs/">Open the integration guide</a>
+        </div>
+<pre><span class="c"># Ask for a verification</span>
+curl -X POST {{BASE_URL}}/api/verifications \
+  -H <span class="s">"X-API-Key: $KEY"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"customerType":"customer","customerId":"cust_10293"}'</span>
+
+<span class="c"># → show this to your customer</span>
+{
+  <span class="k">"id"</span>: <span class="s">"b7e2c1a4-…"</span>,
+  <span class="k">"status"</span>: <span class="s">"PENDING"</span>,
+  <span class="k">"captureUrl"</span>: <span class="s">"{{BASE_URL}}/verify/1k9F…"</span>,
+  <span class="k">"qrCodePngBase64"</span>: <span class="s">"iVBORw0KGgo…"</span>
+}</pre>
+      </div>
+    </section>
+
+    <section class="alt">
+      <div class="wrap note">
+        <div class="eyebrow">Straight talk</div>
+        <h2>A fast pre-screen, not a black box</h2>
+        <p>{{BRAND}}'s automated check is a visual, OCR-based heuristic. It helps you triage submissions quickly, but it is not a certified identity-verification or KYC/AML service. You review the photos and make the final decision, and that decision is what {{BRAND}} records as the authoritative outcome.</p>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap">
+        <div class="cta-box">
+          <h2>Start verifying IDs today</h2>
+          <p>Create an account, grab your API key, and send your first QR code in a few minutes.</p>
+          <div class="cta-row">
+            <a class="btn" data-signup href="/portal/#/register">Create your company account</a>
+            <a class="btn ghost" href="/docs/">Read the docs</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot">
+      <div>© <span id="year"></span> {{BRAND}}</div>
+      <nav aria-label="Footer">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="/docs/">API docs</a>
+        <a href="/portal/">Company sign in</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    // If the operator has closed public registration, don't advertise it.
+    fetch("/portal/api/config").then((r) => r.json()).then((c) => {
+      if (c.signupEnabled) return;
+      document.querySelectorAll("[data-signup]").forEach((a) => { a.href = "/portal/"; a.textContent = "Sign in"; });
+    }).catch(() => {});
+  </script>
+</body>
+</html>

@@ -68,7 +68,16 @@ app.use("/docs", express.static(path.join(publicDir, "docs")));
 // /verify/:token route below, otherwise the token param would swallow them.
 app.use("/verify/assets", express.static(path.join(__dirname, "public", "verify", "assets")));
 
-app.get("/", (_req, res) => res.redirect("/portal/"));
+// Marketing landing page. {{BRAND}} / {{BASE_URL}} are filled in per deployment, same as the API docs.
+let landingHtml: string | null = null;
+app.get("/", (_req, res) => {
+  landingHtml ??= fs
+    .readFileSync(path.join(publicDir, "landing", "index.html"), "utf8")
+    .replace(/\{\{BASE_URL\}\}/g, config.publicBaseUrl)
+    .replace(/\{\{BRAND\}\}/g, config.brandName);
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.type("html").send(landingHtml);
+});
 
 app.use("/", publicRoutes);
 

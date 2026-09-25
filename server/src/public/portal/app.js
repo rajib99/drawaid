@@ -444,7 +444,7 @@
 
   function route() {
     stopTimer();
-    if (!state.me) return renderAuth("login");
+    if (!state.me) return renderAuth(location.hash === "#/register" && state.config.signupEnabled ? "signup" : "login");
     const hash = location.hash || "#/";
     const detail = hash.match(/^#\/verifications\/(.+)$/);
     if (detail) return viewDetail(decodeURIComponent(detail[1]));
