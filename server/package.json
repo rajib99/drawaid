@@ -1,7 +1,7 @@
 {
-  "name": "drawaid-server",
+  "name": "vtbl-server",
   "version": "1.0.0",
-  "description": "DRAWAID ID verification service",
+  "description": "VTBL ID verification service",
   "private": true,
   "type": "commonjs",
   "main": "dist/index.js",

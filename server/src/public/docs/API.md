@@ -42,7 +42,7 @@ Send your API key in the `X-API-Key` header on every request:
 
 ```bash
 curl {{BASE_URL}}/api/verifications \
-  -H "X-API-Key: drwd_your_key_here"
+  -H "X-API-Key: vtbl_your_key_here"
 ```
 
 **Keep the key on your server.** Never put it in a mobile app, browser JavaScript or a public repository, because anyone holding it can read your customers' ID photos. Your frontend should call *your* backend, and your backend calls {{BRAND}}.
@@ -54,7 +54,7 @@ All requests and responses are JSON (`Content-Type: application/json`), except t
 Try the whole flow with `curl`.
 
 ```bash
-export KEY=drwd_your_key_here
+export KEY=vtbl_your_key_here
 
 # 1. Request a verification
 curl -s -X POST {{BASE_URL}}/api/verifications \
@@ -258,15 +258,15 @@ This is a complete backend sketch using Express and the built-in `fetch` (Node 1
 import express from "express";
 import fs from "node:fs/promises";
 
-const DRAWAID = "{{BASE_URL}}";
-const headers = { "X-API-Key": process.env.DRAWAID_API_KEY, "Content-Type": "application/json" };
+const VTBL = "{{BASE_URL}}";
+const headers = { "X-API-Key": process.env.VTBL_API_KEY, "Content-Type": "application/json" };
 
 const app = express();
 app.use(express.json());
 
 // Your frontend calls this. The API key never leaves your server.
 app.post("/start-verification", async (req, res) => {
-  const r = await fetch(`${DRAWAID}/api/verifications`, {
+  const r = await fetch(`${VTBL}/api/verifications`, {
     method: "POST",
     headers,
     body: JSON.stringify({ customerType: "customer", customerId: req.body.userId }),
@@ -278,21 +278,21 @@ app.post("/start-verification", async (req, res) => {
 });
 
 // {{BRAND}} calls this on every status change.
-app.post("/drawaid-webhook", express.json(), async (req, res) => {
+app.post("/vtbl-webhook", express.json(), async (req, res) => {
   res.sendStatus(200); // respond first
   const { verificationId } = req.body;
 
   // Don't trust the payload: fetch the real record.
-  const v = await (await fetch(`${DRAWAID}/api/verifications/${verificationId}`, { headers })).json();
+  const v = await (await fetch(`${VTBL}/api/verifications/${verificationId}`, { headers })).json();
   if (!v.hasFrontImage || !v.hasBackImage) return;
 
   for (const side of ["front", "back"]) {
-    const img = await fetch(`${DRAWAID}/api/verifications/${verificationId}/image/${side}`, { headers });
+    const img = await fetch(`${VTBL}/api/verifications/${verificationId}/image/${side}`, { headers });
     await fs.writeFile(`./ids/${verificationId}-${side}.jpg`, Buffer.from(await img.arrayBuffer()));
   }
 
   // ...review the photos (or your own rules), then decide:
-  await fetch(`${DRAWAID}/api/verifications/${verificationId}/decision`, {
+  await fetch(`${VTBL}/api/verifications/${verificationId}/decision`, {
     method: "POST",
     headers,
     body: JSON.stringify({ decision: "verified" }),
@@ -314,7 +314,7 @@ Show the QR code in your frontend:
 import os, time, requests
 
 BASE = "{{BASE_URL}}"
-H = {"X-API-Key": os.environ["DRAWAID_API_KEY"]}
+H = {"X-API-Key": os.environ["VTBL_API_KEY"]}
 
 v = requests.post(f"{BASE}/api/verifications", headers=H,
                   json={"customerType": "customer", "customerId": "cust_10293"}).json()

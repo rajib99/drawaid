@@ -18,14 +18,14 @@ export const config = {
   port: parseInt(process.env.PORT ?? "3000", 10),
   publicBaseUrl,
   adminToken,
-  brandName: process.env.BRAND_NAME ?? "DRAWAID",
+  brandName: process.env.BRAND_NAME ?? "VTBL",
   // Signs portal / super-admin session cookies. Falls back to a value derived
   // from ADMIN_TOKEN so a fresh deploy works, but set SESSION_SECRET explicitly
   // in production so rotating one secret doesn't rotate the other.
   sessionSecret:
     // `||` not `??`: docker-compose passes an unset variable through as "", and an empty signing key must never be used.
     process.env.SESSION_SECRET ||
-    crypto.createHash("sha256").update(`drawaid-session:${adminToken}`).digest("hex"),
+    crypto.createHash("sha256").update(`vtbl-session:${adminToken}`).digest("hex"),
   businessSessionHours: parseInt(process.env.BUSINESS_SESSION_HOURS ?? String(24 * 7), 10),
   adminSessionHours: parseInt(process.env.ADMIN_SESSION_HOURS ?? "12", 10),
   cookieSecure: publicBaseUrl.startsWith("https://"),

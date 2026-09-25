@@ -6,7 +6,7 @@ describe("apiKey", () => {
     const a = generateApiKey();
     const b = generateApiKey();
     expect(a).not.toEqual(b);
-    expect(a.startsWith("drwd_")).toBe(true);
+    expect(a.startsWith("vtbl_")).toBe(true);
   });
 
   it("hashes deterministically so a stored hash can be looked up again", () => {

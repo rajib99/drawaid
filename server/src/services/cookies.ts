@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { config } from "../config";
 
-export const BUSINESS_COOKIE = "drawaid_session";
-export const ADMIN_COOKIE = "drawaid_admin";
+export const BUSINESS_COOKIE = "vtbl_session";
+export const ADMIN_COOKIE = "vtbl_admin";
 
 export function readCookie(req: Request, name: string): string | undefined {
   const header = req.headers.cookie;

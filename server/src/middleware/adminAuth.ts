@@ -17,7 +17,7 @@ export function adminAuth(req: Request, res: Response, next: NextFunction) {
 
   const session = verifySessionToken(readCookie(req, ADMIN_COOKIE));
   if (session?.role === "admin" && session.fp === credentialFingerprint(config.adminToken)) {
-    if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && req.header("X-Requested-With") !== "drawaid") {
+    if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && req.header("X-Requested-With") !== "vtbl") {
       return res.status(403).json({ error: "Missing X-Requested-With header" });
     }
     return next();

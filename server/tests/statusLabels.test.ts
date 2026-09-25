@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { statusLabel } from "../src/services/statusLabels";
 
 describe("statusLabel", () => {
-  it("produces the DRAWAID software labels for automated statuses", () => {
+  it("produces the VTBL software labels for automated statuses", () => {
     expect(statusLabel("ID_UPLOADED")).toBe("ID Uploaded");
-    expect(statusLabel("VISUALLY_VERIFIED")).toBe("ID Visually Verified by DRAWAID Software");
-    expect(statusLabel("VISUALLY_REJECTED")).toBe("ID Visually Rejected by DRAWAID Software");
+    expect(statusLabel("VISUALLY_VERIFIED")).toBe("ID Visually Verified by VTBL Software");
+    expect(statusLabel("VISUALLY_REJECTED")).toBe("ID Visually Rejected by VTBL Software");
   });
 
   it("embeds the business name for manual decisions", () => {

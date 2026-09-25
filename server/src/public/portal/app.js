@@ -1,7 +1,7 @@
 (function () {
   const { h, api, mount, toast, field } = UI;
   const root = document.getElementById("app");
-  const state = { me: null, config: { brandName: "DRAWAID", signupEnabled: true, baseUrl: location.origin } };
+  const state = { me: null, config: { brandName: "VTBL", signupEnabled: true, baseUrl: location.origin } };
   let timer = null;
 
   const stopTimer = () => { if (timer) { clearInterval(timer); timer = null; } };
@@ -55,7 +55,7 @@
       const name = h("input", { type: "text", autocomplete: "organization", required: true, minlength: 2, maxlength: 100 });
       const email = h("input", { type: "email", autocomplete: "username", required: true });
       const password = h("input", { type: "password", autocomplete: "new-password", required: true, minlength: 10 });
-      const webhook = h("input", { type: "url", placeholder: "https://yourapp.com/drawaid-webhook" });
+      const webhook = h("input", { type: "url", placeholder: "https://yourapp.com/vtbl-webhook" });
       const err = h("div", { class: "notice bad hidden" });
       return h(
         "form",
@@ -376,7 +376,7 @@
   function viewSettings() {
     const me = state.me;
     const name = h("input", { type: "text", value: me.name, required: true });
-    const webhook = h("input", { type: "url", value: me.webhookUrl || "", placeholder: "https://yourapp.com/drawaid-webhook" });
+    const webhook = h("input", { type: "url", value: me.webhookUrl || "", placeholder: "https://yourapp.com/vtbl-webhook" });
     const keyPreview = h("code", {}, me.apiKeyPreview || "(created before the portal - rotate to see a preview)");
 
     const saveForm = h("form", {

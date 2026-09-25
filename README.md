@@ -1,22 +1,22 @@
-# DRAWAID
+# VTBL
 
-DRAWAID is a lightweight ID verification service. A business requests a QR
+VTBL is a lightweight ID verification service. A business requests a QR
 code for a customer; the customer scans it, photographs the front and back
-of their ID from their phone browser, and DRAWAID takes it from there:
+of their ID from their phone browser, and VTBL takes it from there:
 stores the images, runs an automated "visual" check (OCR-based, not
 banking-grade), and lets the business fetch the images and record a manual
 verified/rejected decision through a simple HTTP API.
 
 This document is the integration guide for businesses connecting to a
-running DRAWAID instance, plus operator instructions for running and
-deploying DRAWAID itself.
+running VTBL instance, plus operator instructions for running and
+deploying VTBL itself.
 
 ---
 
 ## How it works
 
 1. **You request a verification.** `POST /api/verifications` with a
-   `customerType` and `customerId`. DRAWAID returns a QR code and a capture
+   `customerType` and `customerId`. VTBL returns a QR code and a capture
    link.
 2. **You show the QR code to your customer** (on a kiosk, receipt, checkout
    screen, etc.), or send them the capture link directly.
@@ -24,16 +24,16 @@ deploying DRAWAID itself.
    (Chrome or any modern mobile browser) that asks for camera permission and
    walks them through photographing the front, then the back, of their ID.
    When done, they see a "Thank you" screen.
-4. **DRAWAID uploads and processes the images.** As soon as both photos are
-   in, the status becomes `ID_UPLOADED` and DRAWAID notifies you (webhook
+4. **VTBL uploads and processes the images.** As soon as both photos are
+   in, the status becomes `ID_UPLOADED` and VTBL notifies you (webhook
    and/or polling - see below).
-5. **DRAWAID runs an automated visual check** (OCR: text legibility, and
+5. **VTBL runs an automated visual check** (OCR: text legibility, and
    sanity-checks for ID-number and date formatting) and updates the status to
    `VISUALLY_VERIFIED` or `VISUALLY_REJECTED`, notifying you again.
 6. **You review and make the final call.** Fetch the front/back images and
    call the decision endpoint to mark the submission `verified` or
    `rejected` on your own authority. This is recorded permanently in
-   DRAWAID's status history alongside your business name.
+   VTBL's status history alongside your business name.
 
 ## Status states
 
@@ -45,13 +45,13 @@ are permanently recorded with a timestamp and are visible in
 | --- | --- |
 | `PENDING` | QR/link issued, waiting for the customer to submit photos. |
 | `ID_UPLOADED` | Front and back photos received. |
-| `VISUALLY_VERIFIED` | "ID Visually Verified by DRAWAID Software" - passed the automated OCR heuristic check. |
-| `VISUALLY_REJECTED` | "ID Visually Rejected by DRAWAID Software" - failed the automated check (see `rejectionReason`). |
+| `VISUALLY_VERIFIED` | "ID Visually Verified by VTBL Software" - passed the automated OCR heuristic check. |
+| `VISUALLY_REJECTED` | "ID Visually Rejected by VTBL Software" - failed the automated check (see `rejectionReason`). |
 | `MANUALLY_VERIFIED` | "ID Manually Verified by `<Your Business Name>`" - you confirmed it via the decision endpoint. |
 | `MANUALLY_REJECTED` | "ID Manually Rejected by `<Your Business Name>`" - you rejected it via the decision endpoint. |
 | `EXPIRED` | The customer never completed the capture flow before the link's TTL ran out. |
 
-`VISUALLY_VERIFIED`/`VISUALLY_REJECTED` are DRAWAID's automated opinion, not
+`VISUALLY_VERIFIED`/`VISUALLY_REJECTED` are VTBL's automated opinion, not
 final - you can still call the decision endpoint afterwards to set the
 manual, business-attributed outcome that matters for your own records.
 
@@ -59,11 +59,13 @@ manual, business-attributed outcome that matters for your own records.
 
 ## Web interfaces
 
+The home page at [`https://vtbl.com`](https://vtbl.com) is a marketing landing page. The tools live at:
+
 | URL | Who it's for | What it does |
 | --- | --- | --- |
-| `/portal` | Businesses | Self-serve registration and sign-in, dashboard, generate QR codes, review ID photos and approve/reject, webhook settings, API key management. |
-| `/docs/` | Business developers | The full integration guide (rendered from `server/src/public/docs/API.md`, with your base URL filled in). |
-| `/superadmin` | You (operator) | Sign in with `ADMIN_TOKEN`. Platform analytics, all companies with usage, block/unblock, issue new API keys, live activity feed. |
+| [`https://vtbl.com/portal`](https://vtbl.com/portal) | Businesses | Self-serve registration and sign-in, dashboard, generate QR codes, review ID photos and approve/reject, webhook settings, API key management. |
+| [`https://vtbl.com/docs/`](https://vtbl.com/docs/) | Business developers | The full integration guide (rendered from `server/src/public/docs/API.md`, with your base URL filled in). |
+| [`https://vtbl.com/superadmin`](https://vtbl.com/superadmin) | You (operator) | Sign in with `ADMIN_TOKEN`. Platform analytics, all companies with usage, block/unblock, issue new API keys, live activity feed. |
 
 The super-admin dashboard shows request **metadata only**. ID photos are visible
 only to the business that requested them.
@@ -80,16 +82,16 @@ after signing up (and can generate a new one under **Settings & API**).
 You can also provision a business yourself, via the admin API:
 
 ```bash
-curl -X POST https://drawaid.example.com/admin/businesses \
+curl -X POST https://vtbl.com/admin/businesses \
   -H "X-Admin-Token: $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Acme Corp", "webhookUrl": "https://acme.example.com/drawaid-webhook"}'
+  -d '{"name": "Acme Corp", "webhookUrl": "https://acme.example.com/vtbl-webhook"}'
 ```
 
 or the CLI (run on the server, no network exposure needed):
 
 ```bash
-cd server && npm run seed -- --name "Acme Corp" --webhook https://acme.example.com/drawaid-webhook
+cd server && npm run seed -- --name "Acme Corp" --webhook https://acme.example.com/vtbl-webhook
 ```
 
 Both return a plaintext `apiKey` **exactly once** - store it securely
@@ -97,7 +99,7 @@ Both return a plaintext `apiKey` **exactly once** - store it securely
 portal login (API key only). Every business request below is authenticated with:
 
 ```
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 ```
 
 ### Blocking a business
@@ -124,13 +126,13 @@ All accept `X-Admin-Token: $ADMIN_TOKEN`:
 
 ## API reference
 
-Base URL is your DRAWAID instance's `PUBLIC_BASE_URL`.
+Base URL is your VTBL instance's `PUBLIC_BASE_URL` - `https://vtbl.com` for the hosted service.
 
 ### Create a verification request
 
 ```
 POST /api/verifications
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 Content-Type: application/json
 
 { "customerType": "retail_customer", "customerId": "cust_10293" }
@@ -146,7 +148,7 @@ Response `201`:
   "id": "b7e2...",
   "token": "1k9F...",
   "status": "PENDING",
-  "captureUrl": "https://drawaid.example.com/verify/1k9F...",
+  "captureUrl": "https://vtbl.com/verify/1k9F...",
   "qrCodePngBase64": "iVBORw0KGgoAAAANSUhEUgA...",
   "expiresAt": "2026-09-11T15:30:00.000Z",
   "createdAt": "2026-09-11T15:00:00.000Z"
@@ -161,7 +163,7 @@ code, or send/display `captureUrl` directly. The link expires after
 
 ```
 GET /api/verifications/:id
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 ```
 
 ```json
@@ -180,7 +182,7 @@ X-API-Key: drwd_...
   "statusHistory": [
     { "status": "PENDING", "label": "ID Verification Requested", "actor": "Acme Corp", "note": null, "createdAt": "..." },
     { "status": "ID_UPLOADED", "label": "ID Uploaded", "actor": "system", "note": null, "createdAt": "..." },
-    { "status": "VISUALLY_VERIFIED", "label": "ID Visually Verified by DRAWAID Software", "actor": "system", "note": null, "createdAt": "..." }
+    { "status": "VISUALLY_VERIFIED", "label": "ID Visually Verified by VTBL Software", "actor": "system", "note": null, "createdAt": "..." }
   ]
 }
 ```
@@ -189,7 +191,7 @@ X-API-Key: drwd_...
 
 ```
 GET /api/verifications?status=ID_UPLOADED&since=2026-09-11T15:00:00.000Z&customerId=cust_10293
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 ```
 
 All query params are optional. `since` filters to records updated after
@@ -203,7 +205,7 @@ changes instead of using webhooks. Returns `{ "verifications": [...] }`
 ```
 GET /api/verifications/:id/image/front
 GET /api/verifications/:id/image/back
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 ```
 
 Streams the raw image (`image/jpeg`, `image/png`, or `image/webp`).
@@ -212,7 +214,7 @@ Streams the raw image (`image/jpeg`, `image/png`, or `image/webp`).
 
 ```
 POST /api/verifications/:id/decision
-X-API-Key: drwd_...
+X-API-Key: vtbl_...
 Content-Type: application/json
 
 { "decision": "verified" }
@@ -237,7 +239,7 @@ Both push and pull are supported - use whichever fits your stack.
 ### Webhooks (push)
 
 Set `webhookUrl` when your business is created. On every status change,
-DRAWAID sends:
+VTBL sends:
 
 ```
 POST <your webhookUrl>
@@ -248,7 +250,7 @@ Content-Type: application/json
   "customerType": "retail_customer",
   "customerId": "cust_10293",
   "status": "VISUALLY_VERIFIED",
-  "statusLabel": "ID Visually Verified by DRAWAID Software",
+  "statusLabel": "ID Visually Verified by VTBL Software",
   "timestamp": "2026-09-11T15:04:12.000Z"
 }
 ```
@@ -274,7 +276,7 @@ cp .env.example .env      # edit ADMIN_TOKEN, DB password, etc.
 docker compose up --build
 ```
 
-This starts Postgres and the DRAWAID app on `http://localhost:3000`
+This starts Postgres and the VTBL app on `http://localhost:3000`
 (migrations run automatically on container start). Create your first
 business:
 
@@ -303,8 +305,8 @@ The included stack is: `app` (this service) + `db` (Postgres) + `caddy`
 1. **Provision a VPS** with Docker and Docker Compose installed, and point a
    DNS `A` record for your chosen domain at its IP.
 2. **Clone this repo onto the VPS** (or just copy `docker-compose.yml` and
-   `Caddyfile`) into a directory, e.g. `/opt/drawaid`.
-3. **Create `/opt/drawaid/.env`** on the VPS from `.env.example`, filling in
+   `Caddyfile`) into a directory, e.g. `/opt/vtbl`.
+3. **Create `/opt/vtbl/.env`** on the VPS from `.env.example`, filling in
    a strong `POSTGRES_PASSWORD`, `ADMIN_TOKEN` (`openssl rand -hex 32`),
    `PUBLIC_BASE_URL=https://yourdomain.com`, and `DOMAIN=yourdomain.com`.
    This file stays on the VPS only - never commit it.
@@ -329,7 +331,7 @@ The included stack is: `app` (this service) + `db` (Postgres) + `caddy`
    | `VPS_USER` | SSH user with Docker access |
    | `VPS_SSH_KEY` | Private key for that user (generate a deploy-only key pair) |
    | `VPS_SSH_PORT` | SSH port, if not `22` |
-   | `VPS_DEPLOY_PATH` | Path on the VPS holding `docker-compose.yml`/`Caddyfile`, e.g. `/opt/drawaid` |
+   | `VPS_DEPLOY_PATH` | Path on the VPS holding `docker-compose.yml`/`Caddyfile`, e.g. `/opt/vtbl` |
 
    The workflow never touches your VPS's `.env` - it only updates which
    image tag is running. If you never add these secrets, the deploy job
@@ -337,7 +339,7 @@ The included stack is: `app` (this service) + `db` (Postgres) + `caddy`
    step 4's command instead.
 6. **Redeploy manually at any time** with:
    ```bash
-   cd /opt/drawaid && docker compose --profile prod pull && docker compose --profile prod up -d
+   cd /opt/vtbl && docker compose --profile prod pull && docker compose --profile prod up -d
    ```
 
 ### Configuration reference
@@ -348,7 +350,7 @@ All via environment variables (see `.env.example`):
 | --- | --- | --- |
 | `ADMIN_TOKEN` | Secret for `/admin/*` endpoints and the `/superadmin` login | *(required)* |
 | `SESSION_SECRET` | Signs portal / super-admin login cookies | derived from `ADMIN_TOKEN` |
-| `BRAND_NAME` | Product name shown in the UIs and API docs | `DRAWAID` |
+| `BRAND_NAME` | Product name shown in the UIs and API docs | `VTBL` |
 | `SIGNUP_ENABLED` | Allow public company registration at `/portal` | `true` |
 | `BUSINESS_SESSION_HOURS` / `ADMIN_SESSION_HOURS` | Login session lifetimes | `168` / `12` |
 | `ALLOW_PRIVATE_WEBHOOKS` | Permit webhook URLs on private/loopback addresses (dev only) | `false` |
@@ -363,7 +365,7 @@ All via environment variables (see `.env.example`):
 
 ## Limitations / honesty notice
 
-DRAWAID's automated "visual verification" is a heuristic OCR check
+VTBL's automated "visual verification" is a heuristic OCR check
 (legibility + ID-number/date format sanity checks via `tesseract.js`), not a
 certified identity-verification or KYC/AML product. It is **not
 banking-grade**. Treat `VISUALLY_VERIFIED`/`VISUALLY_REJECTED` as a fast

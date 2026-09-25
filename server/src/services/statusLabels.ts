@@ -11,9 +11,9 @@ export function statusLabel(status: VerificationStatus, businessName?: string): 
     case "ID_UPLOADED":
       return "ID Uploaded";
     case "VISUALLY_VERIFIED":
-      return "ID Visually Verified by DRAWAID Software";
+      return "ID Visually Verified by VTBL Software";
     case "VISUALLY_REJECTED":
-      return "ID Visually Rejected by DRAWAID Software";
+      return "ID Visually Rejected by VTBL Software";
     case "MANUALLY_VERIFIED":
       return `ID Manually Verified by ${businessName ?? "Business"}`;
     case "MANUALLY_REJECTED":

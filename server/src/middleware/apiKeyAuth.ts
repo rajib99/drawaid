@@ -35,7 +35,7 @@ export async function businessAuth(req: AuthenticatedRequest, res: Response, nex
   if (session?.role === "business") {
     // Cookie auth is ambient, so mutating requests must prove they came from
     // our own JS (a cross-site form post cannot set this header).
-    if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && req.header("X-Requested-With") !== "drawaid") {
+    if (!["GET", "HEAD", "OPTIONS"].includes(req.method) && req.header("X-Requested-With") !== "vtbl") {
       return res.status(403).json({ error: "Missing X-Requested-With header" });
     }
     const business = await prisma.business.findUnique({ where: { id: session.sub } });

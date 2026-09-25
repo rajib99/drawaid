@@ -90,5 +90,5 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 app.listen(config.port, () => {
-  console.log(`DRAWAID server listening on port ${config.port}`);
+  console.log(`VTBL server listening on port ${config.port}`);
 });

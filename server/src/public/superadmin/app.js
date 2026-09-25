@@ -1,7 +1,7 @@
 (function () {
   const { h, api, mount, toast, field } = UI;
   const root = document.getElementById("app");
-  const state = { authed: false, brand: "DRAWAID" };
+  const state = { authed: false, brand: "VTBL" };
   let timer = null;
   const stopTimer = () => { if (timer) { clearInterval(timer); timer = null; } };
   const poll = (fn, ms) => { stopTimer(); timer = setInterval(fn, ms); };

@@ -2,7 +2,7 @@
  * CLI helper for provisioning a business directly against the database,
  * without needing the HTTP server running. Usage:
  *
- *   npm run seed -- --name "Acme Corp" --webhook https://acme.example.com/drawaid-webhook
+ *   npm run seed -- --name "Acme Corp" --webhook https://acme.example.com/vtbl-webhook
  *
  * Prints the plaintext API key once - it is not recoverable afterwards.
  */
@@ -34,7 +34,7 @@ async function main() {
   console.log(`  name:      ${business.name}`);
   console.log(`  webhook:   ${business.webhookUrl ?? "(none)"}`);
   console.log(`  API key:   ${apiKey}`);
-  console.log("\nStore this API key now - DRAWAID cannot show it again.");
+  console.log("\nStore this API key now - VTBL cannot show it again.");
 }
 
 main()

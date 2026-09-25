@@ -30,7 +30,7 @@
   /* ---- API ---- */
   UI.api = async function api(path, opts) {
     opts = opts || {};
-    const headers = { "X-Requested-With": "drawaid" };
+    const headers = { "X-Requested-With": "vtbl" };
     if (opts.body !== undefined) headers["Content-Type"] = "application/json";
     const res = await fetch(path, {
       method: opts.method || (opts.body !== undefined ? "POST" : "GET"),

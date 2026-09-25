@@ -16,7 +16,7 @@ services:
 
   app:
     build: ./server
-    image: ${APP_IMAGE:-drawaid-app:local}
+    image: ${APP_IMAGE:-vtbl-app:local}
     restart: unless-stopped
     depends_on:
       db:
@@ -26,7 +26,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-drawaid}:${POSTGRES_PASSWORD:-drawaid}@db:5432/${POSTGRES_DB:-drawaid}
       ADMIN_TOKEN: ${ADMIN_TOKEN}
       SESSION_SECRET: ${SESSION_SECRET:-}
-      BRAND_NAME: ${BRAND_NAME:-DRAWAID}
+      BRAND_NAME: ${BRAND_NAME:-VTBL}
       SIGNUP_ENABLED: ${SIGNUP_ENABLED:-true}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
       TOKEN_TTL_MINUTES: ${TOKEN_TTL_MINUTES:-30}

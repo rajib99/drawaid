@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const API_KEY_PREFIX = "drwd_";
+const API_KEY_PREFIX = "vtbl_";
 
 /** Generates a new plaintext API key (shown to the business exactly once). */
 export function generateApiKey(): string {
