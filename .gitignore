@@ -4,3 +4,6 @@ data/uploads/
 .env
 *.log
 .DS_Store
+*.traineddata
+qr*.png
+resp.json

@@ -20,3 +20,8 @@ export function hashApiKey(plaintext: string): string {
 export function generateVerificationToken(): string {
   return crypto.randomBytes(24).toString("base64url");
 }
+
+/** Non-secret hint shown in the UI so a business can tell which key is active. */
+export function apiKeyPreview(plaintext: string): string {
+  return `${plaintext.slice(0, 5)}…${plaintext.slice(-4)}`;
+}

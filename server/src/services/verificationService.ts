@@ -32,7 +32,7 @@ export async function transitionStatus(
     },
   });
 
-  if (updated.business.webhookUrl) {
+  if (updated.business.webhookUrl && updated.business.status !== "BLOCKED") {
     // Fire and forget - do not block the request/response cycle on a
     // third-party endpoint.
     void sendWebhook(updated.business.webhookUrl, {

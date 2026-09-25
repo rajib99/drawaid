@@ -17,12 +17,26 @@ enum VerificationStatus {
   EXPIRED
 }
 
+enum BusinessStatus {
+  ACTIVE
+  BLOCKED
+}
+
 model Business {
-  id          String   @id @default(uuid())
-  name        String
-  apiKeyHash  String   @unique
-  webhookUrl  String?
-  createdAt   DateTime @default(now())
+  id             String         @id @default(uuid())
+  name           String
+  // Portal login. Nullable so businesses provisioned before the portal existed
+  // (via POST /admin/businesses or the seed CLI) keep working with just an API key.
+  email          String?        @unique
+  passwordHash   String?
+  apiKeyHash     String         @unique
+  apiKeyPreview  String?
+  webhookUrl     String?
+  status         BusinessStatus @default(ACTIVE)
+  blockedAt      DateTime?
+  blockedReason  String?
+  lastLoginAt    DateTime?
+  createdAt      DateTime       @default(now())
 
   verificationRequests VerificationRequest[]
 }
@@ -49,6 +63,7 @@ model VerificationRequest {
   @@index([businessId])
   @@index([status])
   @@index([customerId])
+  @@index([createdAt])
 }
 
 model StatusEvent {
@@ -62,4 +77,5 @@ model StatusEvent {
   createdAt              DateTime             @default(now())
 
   @@index([verificationRequestId])
+  @@index([createdAt])
 }

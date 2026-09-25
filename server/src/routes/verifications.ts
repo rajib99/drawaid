@@ -2,7 +2,7 @@ import fs from "fs";
 import { Response, Router } from "express";
 import { prisma } from "../db";
 import { config } from "../config";
-import { apiKeyAuth } from "../middleware/apiKeyAuth";
+import { businessAuth } from "../middleware/apiKeyAuth";
 import { captureUrlForToken, generateQrPngBase64 } from "../services/qrcode";
 import { generateVerificationToken } from "../services/apiKey";
 import { resolveImagePath } from "../services/storage";
@@ -11,7 +11,7 @@ import { AuthenticatedRequest } from "../types";
 
 const router = Router();
 
-router.use(apiKeyAuth);
+router.use(businessAuth);
 
 function serializeVerification(v: any) {
   return {
@@ -151,6 +151,9 @@ router.post("/:id/decision", async (req: AuthenticatedRequest, res: Response) =>
   const { decision, reason } = req.body ?? {};
   if (decision !== "verified" && decision !== "rejected") {
     return res.status(400).json({ error: "decision must be 'verified' or 'rejected'" });
+  }
+  if (reason !== undefined && (typeof reason !== "string" || reason.length > 500)) {
+    return res.status(400).json({ error: "reason must be a string up to 500 characters" });
   }
 
   const verification = await prisma.verificationRequest.findFirst({

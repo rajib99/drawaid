@@ -21,8 +21,14 @@ const upload = multer({
 });
 
 async function findLiveVerificationByToken(token: string) {
-  const verification = await prisma.verificationRequest.findUnique({ where: { token } });
-  if (!verification) return { verification: null, expired: false };
+  const verification = await prisma.verificationRequest.findUnique({
+    where: { token },
+    include: { business: { select: { status: true } } },
+  });
+  // A blocked business's outstanding capture links stop working immediately.
+  if (!verification || verification.business.status === "BLOCKED") {
+    return { verification: null, expired: false };
+  }
 
   if (verification.status === "PENDING" && verification.expiresAt.getTime() < Date.now()) {
     await transitionStatus(verification.id, "EXPIRED", "system", "Capture link expired before upload");
@@ -102,14 +108,24 @@ async function runVisualVerification(verificationRequestId: string, frontBuffer:
   try {
     const result = await verifyIdVisually(frontBuffer, backBuffer);
 
+    // The business may already have decided manually while OCR was running (for
+    // example from an ID_UPLOADED webhook). A manual decision is final: keep the
+    // OCR data for reference, but don't overwrite the status or the reason.
+    const current = await prisma.verificationRequest.findUnique({
+      where: { id: verificationRequestId },
+      select: { status: true },
+    });
+    const alreadyDecided = current?.status === "MANUALLY_VERIFIED" || current?.status === "MANUALLY_REJECTED";
+
     await prisma.verificationRequest.update({
       where: { id: verificationRequestId },
       data: {
         ocrConfidence: result.overallConfidence,
         ocrExtractedText: { front: result.front.text, back: result.back.text },
-        rejectionReason: result.passed ? null : result.reason,
+        ...(alreadyDecided ? {} : { rejectionReason: result.passed ? null : result.reason }),
       },
     });
+    if (alreadyDecided) return;
 
     await transitionStatus(
       verificationRequestId,

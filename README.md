@@ -57,10 +57,27 @@ manual, business-attributed outcome that matters for your own records.
 
 ---
 
+## Web interfaces
+
+| URL | Who it's for | What it does |
+| --- | --- | --- |
+| `/portal` | Businesses | Self-serve registration and sign-in, dashboard, generate QR codes, review ID photos and approve/reject, webhook settings, API key management. |
+| `/docs/` | Business developers | The full integration guide (rendered from `server/src/public/docs/API.md`, with your base URL filled in). |
+| `/superadmin` | You (operator) | Sign in with `ADMIN_TOKEN`. Platform analytics, all companies with usage, block/unblock, issue new API keys, live activity feed. |
+
+The super-admin dashboard shows request **metadata only**. ID photos are visible
+only to the business that requested them.
+
+Set `SIGNUP_ENABLED=false` to close public registration.
+
+---
+
 ## Getting an API key
 
-DRAWAID does not have a self-serve signup page. The DRAWAID operator
-provisions your business and hands you an API key, either via the admin API:
+Businesses register themselves at `/portal` and are shown their API key once
+after signing up (and can generate a new one under **Settings & API**).
+
+You can also provision a business yourself, via the admin API:
 
 ```bash
 curl -X POST https://drawaid.example.com/admin/businesses \
@@ -76,12 +93,32 @@ cd server && npm run seed -- --name "Acme Corp" --webhook https://acme.example.c
 ```
 
 Both return a plaintext `apiKey` **exactly once** - store it securely
-(secrets manager, not source control). Every business request below is
-authenticated with:
+(secrets manager, not source control). Businesses provisioned this way have no
+portal login (API key only). Every business request below is authenticated with:
 
 ```
 X-API-Key: drwd_...
 ```
+
+### Blocking a business
+
+From `/superadmin` (or `POST /admin/businesses/:id/block`). A blocked business's
+API key, portal login and outstanding customer capture links stop working
+immediately (`403 ACCOUNT_BLOCKED`); no data is deleted, and unblocking restores
+everything.
+
+### Super-admin API
+
+All accept `X-Admin-Token: $ADMIN_TOKEN`:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /admin/overview` | Platform totals, 30-day request series, status breakdown, top companies. |
+| `GET /admin/businesses?search=&status=` | Companies with request counts and last activity. |
+| `GET /admin/businesses/:id` | One company's analytics and recent requests. |
+| `POST /admin/businesses/:id/block` `{reason?}` / `/unblock` | Block or restore access. |
+| `POST /admin/businesses/:id/rotate-key` | Issue a new API key (returned once). |
+| `GET /admin/activity?limit=` | Newest status events across all companies. |
 
 ---
 
@@ -309,7 +346,12 @@ All via environment variables (see `.env.example`):
 
 | Variable | Purpose | Default |
 | --- | --- | --- |
-| `ADMIN_TOKEN` | Bearer secret for `/admin/*` endpoints | *(required)* |
+| `ADMIN_TOKEN` | Secret for `/admin/*` endpoints and the `/superadmin` login | *(required)* |
+| `SESSION_SECRET` | Signs portal / super-admin login cookies | derived from `ADMIN_TOKEN` |
+| `BRAND_NAME` | Product name shown in the UIs and API docs | `DRAWAID` |
+| `SIGNUP_ENABLED` | Allow public company registration at `/portal` | `true` |
+| `BUSINESS_SESSION_HOURS` / `ADMIN_SESSION_HOURS` | Login session lifetimes | `168` / `12` |
+| `ALLOW_PRIVATE_WEBHOOKS` | Permit webhook URLs on private/loopback addresses (dev only) | `false` |
 | `PUBLIC_BASE_URL` | Base URL used to build QR/capture links | `http://localhost:3000` |
 | `TOKEN_TTL_MINUTES` | Minutes a capture link stays valid | `30` |
 | `MAX_UPLOAD_BYTES` | Max size per uploaded image | `10485760` (10MB) |
@@ -340,10 +382,14 @@ idVerifier/
   .github/workflows/        # CI (test+build+push) and CD (VPS deploy)
   server/
     src/
-      routes/                admin.ts, verifications.ts, public.ts
+      routes/                admin.ts, portal.ts, verifications.ts, public.ts
       services/               qrcode, ocr, webhook, storage, status labels
-      middleware/             API key + admin auth
+      middleware/             API key / portal session + admin auth
       public/verify/          mobile ID-capture web page
+      public/portal/          company web portal
+      public/superadmin/      super-admin dashboard
+      public/docs/            API.md (integration guide) + renderer
+      public/shared/          shared UI css/js
     prisma/                  schema + migrations
     tests/                   unit tests (vitest)
 ```
