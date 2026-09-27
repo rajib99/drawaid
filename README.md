@@ -232,6 +232,223 @@ not). This is a terminal state - call it once you're satisfied.
 
 ---
 
+## Code examples
+
+Complete, runnable scripts for the full flow: create a verification, wait for
+the customer to submit their ID, download the photos, and record your
+decision. Replace `YOUR_API_KEY` (and `BASE_URL` if you're self-hosting) and
+run as-is.
+
+### Node.js
+
+Requires Node 18+ (built-in `fetch`). No packages to install.
+
+```js
+// verify.js - run with: node verify.js
+const fs = require("fs");
+
+const BASE_URL = "https://vtbl.com";
+const API_KEY = "YOUR_API_KEY";        // from the portal, Settings & API
+const CUSTOMER_TYPE = "retail_customer"; // your own label
+const CUSTOMER_ID = "cust_10293";        // your identifier for this person
+
+const headers = { "X-API-Key": API_KEY, "Content-Type": "application/json" };
+
+async function main() {
+  // 1. Create the verification and get a QR code / link for the customer
+  const createRes = await fetch(`${BASE_URL}/api/verifications`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ customerType: CUSTOMER_TYPE, customerId: CUSTOMER_ID }),
+  });
+  if (!createRes.ok) throw new Error(`Create failed: ${createRes.status} ${await createRes.text()}`);
+  const verification = await createRes.json();
+
+  console.log("Send the customer to:", verification.captureUrl);
+  fs.writeFileSync("qr.png", Buffer.from(verification.qrCodePngBase64, "base64"));
+  console.log("QR code saved to qr.png");
+
+  // 2. Poll until the customer has submitted (or the link expires)
+  const id = verification.id;
+  let current = verification;
+  while (current.status === "PENDING") {
+    await new Promise((r) => setTimeout(r, 3000));
+    const res = await fetch(`${BASE_URL}/api/verifications/${id}`, { headers });
+    current = await res.json();
+    console.log("Status:", current.status);
+  }
+  if (current.status === "EXPIRED") throw new Error("Customer never completed the capture link");
+
+  // 3. Download the photos
+  for (const side of ["front", "back"]) {
+    const imgRes = await fetch(`${BASE_URL}/api/verifications/${id}/image/${side}`, { headers });
+    fs.writeFileSync(`${id}-${side}.jpg`, Buffer.from(await imgRes.arrayBuffer()));
+    console.log(`Saved ${id}-${side}.jpg`);
+  }
+
+  // 4. Record your decision (after you've reviewed the photos, or your own rules)
+  const decisionRes = await fetch(`${BASE_URL}/api/verifications/${id}/decision`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ decision: "verified" }),
+    // or: body: JSON.stringify({ decision: "rejected", reason: "Photo of back side is blurry" }),
+  });
+  console.log("Final result:", await decisionRes.json());
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
+```
+
+### Python
+
+Requires the `requests` package: `pip install requests`.
+
+```python
+# verify.py - run with: python verify.py
+import time
+import requests
+
+BASE_URL = "https://vtbl.com"
+API_KEY = "YOUR_API_KEY"          # from the portal, Settings & API
+CUSTOMER_TYPE = "retail_customer"  # your own label
+CUSTOMER_ID = "cust_10293"         # your identifier for this person
+
+HEADERS = {"X-API-Key": API_KEY}
+
+
+def main():
+    # 1. Create the verification and get a QR code / link for the customer
+    resp = requests.post(
+        f"{BASE_URL}/api/verifications",
+        headers=HEADERS,
+        json={"customerType": CUSTOMER_TYPE, "customerId": CUSTOMER_ID},
+    )
+    resp.raise_for_status()
+    verification = resp.json()
+
+    print("Send the customer to:", verification["captureUrl"])
+    with open("qr.png", "wb") as f:
+        import base64
+        f.write(base64.b64decode(verification["qrCodePngBase64"]))
+    print("QR code saved to qr.png")
+
+    # 2. Poll until the customer has submitted (or the link expires)
+    verification_id = verification["id"]
+    current = verification
+    while current["status"] == "PENDING":
+        time.sleep(3)
+        current = requests.get(f"{BASE_URL}/api/verifications/{verification_id}", headers=HEADERS).json()
+        print("Status:", current["status"])
+    if current["status"] == "EXPIRED":
+        raise SystemExit("Customer never completed the capture link")
+
+    # 3. Download the photos
+    for side in ("front", "back"):
+        img = requests.get(f"{BASE_URL}/api/verifications/{verification_id}/image/{side}", headers=HEADERS)
+        filename = f"{verification_id}-{side}.jpg"
+        with open(filename, "wb") as f:
+            f.write(img.content)
+        print(f"Saved {filename}")
+
+    # 4. Record your decision (after you've reviewed the photos, or your own rules)
+    decision = requests.post(
+        f"{BASE_URL}/api/verifications/{verification_id}/decision",
+        headers=HEADERS,
+        json={"decision": "verified"},
+        # or: json={"decision": "rejected", "reason": "Photo of back side is blurry"},
+    )
+    print("Final result:", decision.json())
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### PHP
+
+Requires the `curl` extension, which ships with PHP by default.
+
+```php
+<?php
+// verify.php - run with: php verify.php
+
+$baseUrl = "https://vtbl.com";
+$apiKey = "YOUR_API_KEY";          // from the portal, Settings & API
+$customerType = "retail_customer";  // your own label
+$customerId = "cust_10293";         // your identifier for this person
+
+function vtblRequest(string $method, string $url, ?array $body, string $apiKey): array {
+    $ch = curl_init($url);
+    $headers = ["X-API-Key: $apiKey"];
+    if ($body !== null) $headers[] = "Content-Type: application/json";
+    curl_setopt_array($ch, [
+        CURLOPT_CUSTOMREQUEST => $method,
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_POSTFIELDS => $body !== null ? json_encode($body) : null,
+        CURLOPT_RETURNTRANSFER => true,
+    ]);
+    $raw = curl_exec($ch);
+    if ($raw === false) throw new Exception("Request failed: " . curl_error($ch));
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($status >= 400) throw new Exception("HTTP $status: $raw");
+    return json_decode($raw, true);
+}
+
+// 1. Create the verification and get a QR code / link for the customer
+$verification = vtblRequest("POST", "$baseUrl/api/verifications", [
+    "customerType" => $customerType,
+    "customerId" => $customerId,
+], $apiKey);
+
+echo "Send the customer to: {$verification['captureUrl']}
+";
+file_put_contents("qr.png", base64_decode($verification["qrCodePngBase64"]));
+echo "QR code saved to qr.png
+";
+
+// 2. Poll until the customer has submitted (or the link expires)
+$id = $verification["id"];
+$current = $verification;
+while ($current["status"] === "PENDING") {
+    sleep(3);
+    $current = vtblRequest("GET", "$baseUrl/api/verifications/$id", null, $apiKey);
+    echo "Status: {$current['status']}
+";
+}
+if ($current["status"] === "EXPIRED") {
+    throw new Exception("Customer never completed the capture link");
+}
+
+// 3. Download the photos
+foreach (["front", "back"] as $side) {
+    $ch = curl_init("$baseUrl/api/verifications/$id/image/$side");
+    curl_setopt_array($ch, [
+        CURLOPT_HTTPHEADER => ["X-API-Key: $apiKey"],
+        CURLOPT_RETURNTRANSFER => true,
+    ]);
+    $image = curl_exec($ch);
+    curl_close($ch);
+    file_put_contents("$id-$side.jpg", $image);
+    echo "Saved $id-$side.jpg
+";
+}
+
+// 4. Record your decision (after you've reviewed the photos, or your own rules)
+$decision = vtblRequest("POST", "$baseUrl/api/verifications/$id/decision", [
+    "decision" => "verified",
+    // or: "decision" => "rejected", "reason" => "Photo of back side is blurry",
+], $apiKey);
+
+echo "Final result: " . json_encode($decision) . "
+";
+```
+
+---
+
 ## Getting notified
 
 Both push and pull are supported - use whichever fits your stack.
