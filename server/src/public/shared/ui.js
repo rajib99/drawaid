@@ -27,6 +27,31 @@
     root.replaceChildren(...nodes.flat().filter(Boolean));
   };
 
+  /* ---- Brand ---- */
+  // The VTBL mark: a bold "V" on a rounded square, in the theme's accent colors
+  // (via CSS vars, so it stays correct in dark mode). Self-contained SVG rather
+  // than a CSS background, so it can't disappear if ui.css fails to load.
+  const LOGO_PATH = "M4.5 5 L9.3 5 L12 12.4 L14.7 5 L19.5 5 L13.6 19.5 L10.4 19.5 Z";
+  UI.logo = function (size) {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", size || 22);
+    svg.setAttribute("height", size || 22);
+    svg.setAttribute("class", "brand-mark");
+    svg.setAttribute("aria-hidden", "true");
+    const rect = document.createElementNS(ns, "rect");
+    rect.setAttribute("width", "24");
+    rect.setAttribute("height", "24");
+    rect.setAttribute("rx", "6");
+    rect.setAttribute("fill", "var(--accent)");
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", LOGO_PATH);
+    path.setAttribute("fill", "var(--accent-ink)");
+    svg.append(rect, path);
+    return svg;
+  };
+
   /* ---- API ---- */
   UI.api = async function api(path, opts) {
     opts = opts || {};

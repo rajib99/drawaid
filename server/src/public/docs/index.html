@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>API Documentation</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="stylesheet" href="/static/ui.css">
   <style>
     .docs { max-width: 1120px; margin: 0 auto; padding: 24px 16px 80px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; }
@@ -31,7 +32,13 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand"><span class="brand-mark"></span><span id="brand">API</span><small>Docs</small></div>
+      <div class="brand">
+        <svg class="brand-mark" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <rect width="24" height="24" rx="6" fill="var(--accent)"/>
+          <path d="M4.5 5 L9.3 5 L12 12.4 L14.7 5 L19.5 5 L13.6 19.5 L10.4 19.5 Z" fill="var(--accent-ink)"/>
+        </svg>
+        <span id="brand">API</span><small>Docs</small>
+      </div>
       <nav class="nav"></nav>
       <div class="topbar-user"><a class="btn sm primary" href="/portal/">Company portal</a></div>
     </div>

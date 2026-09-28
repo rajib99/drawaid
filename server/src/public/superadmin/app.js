@@ -14,7 +14,7 @@
     mount(root,
       h("div", { class: "auth-wrap" },
         h("div", { class: "auth-card card" },
-          h("div", { class: "brand" }, h("span", { class: "brand-mark" }), state.brand, h("small", {}, "Super Admin")),
+          h("div", { class: "brand" }, UI.logo(), state.brand, h("small", {}, "Super Admin")),
           h("div", { class: "tagline" }, "Platform administration"),
           notice ? h("div", { class: "notice info" }, notice) : null,
           h("form", {
@@ -37,7 +37,7 @@
     mount(root,
       h("header", { class: "topbar" },
         h("div", { class: "topbar-inner" },
-          h("div", { class: "brand" }, h("span", { class: "brand-mark" }), state.brand, h("small", {}, "Super Admin")),
+          h("div", { class: "brand" }, UI.logo(), state.brand, h("small", {}, "Super Admin")),
           h("nav", { class: "nav" }, link("#/", "Overview", "overview"), link("#/companies", "Companies", "companies"), link("#/activity", "Activity", "activity")),
           h("div", { class: "topbar-user" }, h("button", { class: "btn sm", onclick: logout }, "Sign out")))),
       h("main", {}, content));

@@ -93,7 +93,7 @@
         h(
           "div",
           { class: "auth-card card" },
-          h("div", { class: "brand" }, h("span", { class: "brand-mark" }), state.config.brandName),
+          h("div", { class: "brand" }, UI.logo(), state.config.brandName),
           h("div", { class: "tagline" }, "ID verification for your business"),
           notice ? h("div", { class: "notice info" }, notice) : null,
           box
@@ -143,7 +143,7 @@
         h(
           "div",
           { class: "topbar-inner" },
-          h("div", { class: "brand" }, h("span", { class: "brand-mark" }), state.config.brandName),
+          h("div", { class: "brand" }, UI.logo(), state.config.brandName),
           h(
             "nav",
             { class: "nav" },

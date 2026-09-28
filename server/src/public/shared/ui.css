@@ -77,7 +77,7 @@ code { background: var(--surface-2); padding: 1px 6px; border-radius: 5px; }
   display: flex; align-items: center; gap: 20px; min-height: 56px; flex-wrap: wrap;
 }
 .brand { font-weight: 700; letter-spacing: 0.02em; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.brand-mark { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); display: inline-block; }
+.brand-mark { flex: none; display: block; } /* sizing/colors are baked into the SVG (UI.logo) */
 .brand small { font-weight: 500; color: var(--muted); letter-spacing: 0; }
 .nav { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
 .nav a {
